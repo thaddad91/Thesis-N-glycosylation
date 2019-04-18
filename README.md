@@ -1,4 +1,5 @@
 Author: Thierry Haddad
+
 Supervisor: Aalt-Jan van Dijk
 
 Repo containing the scripts created during my thesis about N-glycosylation in plants using machine learning applications.
