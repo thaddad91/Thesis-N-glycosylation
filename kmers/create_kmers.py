@@ -1,31 +1,28 @@
 #!/usr/bin/env python
 
-# Author: Thierry Haddad
-# Description: Script to extract k-mers occurrence per sequon for
-#              unsupervised learning.
+"""
+Author:      Thierry Haddad
+Description: Script to extract k-mers occurrence per sequon for
+             unsupervised learning purposes.
+"""
 
 import itertools
 import pickle
 import sys
 import os
 
-# Create dictionary of all possible kmers, set default occurrence 0
 def create_kmer_dict():
+    """Create dictionary of all possible kmers, set default occurrence to 0"""
     aa = list("ACDEFGHIKLMNPQRSTVWY")  # All 20 natural amino acids
-    print(aa)
-    perm = list(itertools.combinations_with_replacement(aa, 3))
+    perm = list(itertools.combinations_with_replacement(aa, 3))  # All triplet permutations
     kmers = []
-    print(len(perm))
     for p in perm:
         kmer = "".join(p)
         kmers.append(kmer)
-    print(kmers[:100])
-    #kmer_dict = {}
-    #for kmer in kmers:
-    #    kmer_dict[kmer] = 0
     return kmers
 
 def read_pickle():
+    """Open and read serialized dictionary containing glycosites, indixes and sequences."""
     with open("pos_neg_glycosites","rb") as f:
         ara_d = pickle.load(f)
     if type(ara_d) == dict:
@@ -37,13 +34,13 @@ def read_pickle():
     return ara_d
 
 def count_occurrences(ara_d, kmers):
+    """For every triplet, count the occurrences in the sequons."""
     lines = []
     header = "glycosite\t"+"\t".join(kmers)+"\n"
     for id in ara_d:
-        bool = ["pos", "neg"]
-        for b in bool:
+        for b in ["pos", "neg"]:
             for seq in ara_d[id][b]:
-                seq = seq[1]
+                seq = seq[1]  # Sequon
                 line = b+"\t"
                 counts = []
                 for kmer in kmers:
@@ -57,13 +54,15 @@ def count_occurrences(ara_d, kmers):
             kl.write(line+"\n")
 
 def seq_list(ara_d):
+    """Create a list of sequons and a positive/negative label.
+       Currently unused.
+    """
     results = []
     for id in ara_d:
-        bool = ["pos", "neg"]
-        for b in bool:
+        for b in ["pos", "neg"]:
             for seq in ara_d[id][b]:
                 if seq[1] != '':
-                    results.append([seq[1], b])
+                    results.append([seq[1], b])  # Append sequon + pos/neg label
     with open("seq_list.txt","w") as sl:
         for result in results:
             sl.write(result[0]+"\t"+result[1]+"\n")
@@ -71,7 +70,6 @@ def seq_list(ara_d):
 def run_script():
     kmers = create_kmer_dict()
     ara_d = read_pickle()
-    print(len(ara_d))
     #seq_list(ara_d)
     count_occurrences(ara_d, kmers)
 
