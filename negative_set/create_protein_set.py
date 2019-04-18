@@ -1,29 +1,29 @@
 #!/usr/bin/env python
 
-# Author: Thierry Haddad
-# Description: Script to combine positive and negative datasets in to a 
-#              complete glycosite-level dataset.
+"""
+Author:      Thierry Haddad
+Description: Script to combine positive and negative datasets in to a
+             complete glycosite-level dataset.
+"""
 
 import sys
 import re
 import pickle
 from Bio import SeqIO
 
-# Sequon finder
 def create_window(index, sequence):
+    """Finds index of sequon in sequence and creates a 15 residue window."""
     sequon = ''
-    # Create 15n sequon window in sequence
     if index > 8 and len(sequence) - index > 8:  # Complete 15n window
         sequon = sequence[index - 7:index + 8]
-    elif index < 8:  # Motif at very beginning
+    elif index < 8:                              # Motif at very beginning
         sequon = sequence[:index + 8]
-    elif len(sequence) - index < 8:  # Motif at very end
+    elif len(sequence) - index < 8:              # Motif at very end
         sequon = sequence[index - 7:]
     return sequon
 
-# Find potential glycosites in the given sequence
 def find_potentials(motif, sequence, ara_d, id, pos):
-    # Find negatives in sequence
+    """Find potential glycosites in the given sequence."""
     pot_glycos = re.finditer(motif, sequence)  # All potential glycosites
     for pot_glyco in pot_glycos:
         pot_index = pot_glyco.start(0)
@@ -40,8 +40,8 @@ def find_potentials(motif, sequence, ara_d, id, pos):
                 ara_d[id] = {"pos":[], "sequence":sequence, "neg":[[pot_index, pot_sequon]]}
     return ara_d
 
-# Positives and negatives from final_table.txt
 def final_table(motif):
+    """Positives and negatives from final_table.txt."""
     ara_d = {}
     with open('final_table.txt','r') as f:
         lines = f.readlines()
@@ -79,25 +79,23 @@ def final_table(motif):
     print("Not added: ", not_added)
     return ara_d
 
-# Negatives from entire Arabidopsis proteome
 def neg_from_proteome(motif, ara_d):
-    # Read entire Arabidopsis proteome
-    fasta_sequences = SeqIO.parse(open("ara_proteome.fasta"), "fasta")
+    """Negatives from complete Arabidopsis proteome."""
+    fasta_sequences = SeqIO.parse(open("ara_proteome.fasta"), "fasta")  # Full proteome
     for fasta in fasta_sequences:
         id, sequence = fasta.id, str(fasta.seq)  # type: (object, str)
         # Find potential glycosites in sequence
         ara_d = find_potentials(motif, sequence, ara_d, id, pos=False)
     return ara_d
 
-
-# Serialize the pos/neg dictionary to a file
 def serialize_ara_d(ara_d):
+    """Serialize the pos/neg dictionary to a file."""
     with open("pos_neg_glycosites","wb") as f:
         pickle.dump(ara_d, f)
     return True
 
-# Unserialize test
 def unserialize_ara_d():
+    """Test to check serialization integrity."""
     with open("pos_neg_glycosites","rb") as f:
         new_d = pickle.load(f)
     if type(new_d) == dict:
@@ -106,8 +104,8 @@ def unserialize_ara_d():
         print("Serialization failed!")
         print(type(new_d))
 
-# Dataset with similar entries removed and curated
 def final_dict(ara_d):
+    """Dataset with similar entries removed and curated."""
     final_d = {}
     c = 0  # Counter for window intersect
     ids = ara_d.keys()
@@ -143,9 +141,8 @@ def final_dict(ara_d):
     print(c)
     return final_d
 
-# Function to remove negative duplicates and in-positive-window negatives
 def remove_neg_dups(set_n, set_p, c):
-    # Remove duplicates
+    """Function to remove negative duplicates and in-positive-window negatives."""
     p_set = set(map(tuple, set_p))
     p = list(map(list, p_set))
     n_set = set(map(tuple, set_n))
@@ -169,8 +166,8 @@ def remove_neg_dups(set_n, set_p, c):
                     n2 = list(filter((e).__ne__, n2))
     return n2, p, c
 
-# Create tab-delimited file of the dataset
 def create_table(ara_d):
+    """Create tab-delimited file of the dataset."""
     with open("pos_neg_table.txt","w") as f:
         for id in ara_d:
             sequence = ara_d[id]["sequence"]
@@ -182,9 +179,8 @@ def create_table(ara_d):
                     f.write("{}\t{}\t{}\t{}\t{}\n".format(id, pn, index, sequon, sequence))
     return True
 
-
-# Run the entire script
 def run_script():
+    """Run the entire script."""
     # Nx[S/T] glycosite motif
     motif = re.compile('N[^P][ST]')
 
@@ -200,7 +196,7 @@ def run_script():
     neg = sum([len(ara_d[id]["neg"]) for id in ara_d])
     print(neg)
     serialize_ara_d(ara_d)
-    #unserialize_ara_d()
+    #unserialize_ara_d()  # Test, not needed normally
 
     create_table(ara_d)
 
