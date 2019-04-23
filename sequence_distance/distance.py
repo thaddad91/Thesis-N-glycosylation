@@ -65,6 +65,8 @@ def calc_distance(train, test):
             best_label = ""
             for b2 in ["pos", "neg"]:
                 for seq2 in train[b2]:
+                    # d -> A dictionary returns the score of any pair of characters.
+                    # x -> No gap penalties.
                     al = pairwise2.align.globaldx(seq, seq2, blosum62, score_only = True)
                     print(al)
                     sys.exit(1)
