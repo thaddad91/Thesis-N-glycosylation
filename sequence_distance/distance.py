@@ -8,10 +8,9 @@ Description: Script to calculate the distance between two A.A. sequences using
 """
 
 from Bio.SubsMat.MatrixInfo import blosum62
-from Bio import pairwise2
-from sklearn.model_selection import KFold
+#from Bio import pairwise2
+#from sklearn.model_selection import KFold
 import pickle
-import sys
 
 loc = "/mnt/scratch/hadda003/negative_set/"
 
@@ -44,23 +43,16 @@ def partition_data(ara_d):
     #pos_set = pos_set[:100]  # Debugging
     sub_neg = neg_set[:2200]  # Subset for debugging purposes
 
-    kfold = KFold(10, True, 1)
-
-
-    for train, test in kfold.split(pos_set+sub_neg):
-        print(len(train), len(test))
-        sys.exit(1)
-
-        # Train (75%) and test (25%) sets
-        # train = {
-        #     "pos": pos_set[:int(len(pos_set) * 0.9)],
-        #     "neg": sub_neg[:int(len(sub_neg) * 0.9)],
-        # }
-        # test = {
-        #     "pos": pos_set[int(len(pos_set) * 0.9):],
-        #     "neg": sub_neg[int(len(sub_neg) * 0.9):],
-        # }
-        #return train, test
+    #Train (75%) and test (25%) sets
+    train = {
+        "pos": pos_set[:int(len(pos_set) * 0.75)],
+        "neg": sub_neg[:int(len(sub_neg) * 0.75)],
+    }
+    test = {
+        "pos": pos_set[int(len(pos_set) * 0.75):],
+        "neg": sub_neg[int(len(sub_neg) * 0.75):],
+    }
+    return train, test
 
 def calc_distance(train, test):
     """Calculate distance between seq from test and sequences from train.
@@ -70,7 +62,7 @@ def calc_distance(train, test):
     bad = 0
     for b in ["pos", "neg"]:
         for seq in test[b]:
-            best_match = ""
+            #best_match = ""  # Unused
             best_score = 0
             best_label = ""
             for b2 in ["pos", "neg"]:
@@ -100,7 +92,7 @@ def run_script():
     """Wrapper function"""
     ara_d = unpickle()
     train, test = partition_data(ara_d)
-    #calc_distance(train, test)
+    calc_distance(train, test)
 
 if __name__ == "__main__":
     run_script()
