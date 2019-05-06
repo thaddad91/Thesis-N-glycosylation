@@ -10,7 +10,7 @@ from proteinko import Proteinko
 
 prot = Proteinko()
 
-# Add read table func
+# Add read table func, see negative dir
 
 def create_tables(data = []):
     """
@@ -24,8 +24,8 @@ def create_tables(data = []):
     for scheme in schemes:
         table = []  # New table
         for line in data:
-            seq = data[1]
-            label = data[0]
+            seq = data[3]
+            label = data[1]
             # This step will take long for all entries
             dist = list(prt.get_dist(seq, scheme))
             new_line = label + "\t" + "\t".join(dist) + "\n"
