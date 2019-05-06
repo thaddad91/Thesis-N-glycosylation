@@ -50,13 +50,20 @@ def calc_dist(data, scheme, prt):
         if not c%1000:
             print(scheme, c, total)  # Debug counter
         line = line.split("\t")
-        seq = line[3]
+        seq = line[3].strip()
         if not len(seq) == 15:
             continue
-        label = line[1]
+        label = line[1].strip()
 
         # This step will take long for all entries
         dist = list(prt.get_dist(seq, scheme))
+        # Check for only floats
+        for val in dist:
+            try:
+                num = float(val)
+            except:
+                print(seq, val)
+                continue  # Skip due to R issues
         dist = list(map(str, dist))  # Writeable
         new_line = label + "\t" + "\t".join(dist) + "\n"
         table.append(new_line)
