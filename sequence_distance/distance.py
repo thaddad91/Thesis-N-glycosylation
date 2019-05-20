@@ -60,6 +60,10 @@ def calc_distance(train, test):
     """
     good = 0
     bad = 0
+    tp = 0
+    tn = 0
+    fp = 0
+    fn = 0
     for b in ["pos", "neg"]:
         for seq in test[b]:
             #best_match = ""  # Unused
@@ -84,9 +88,18 @@ def calc_distance(train, test):
             # If best training sequence label equals test label
             if best_label == b:
                 good += 1
+                if b == "pos":
+                    tp += 1
+                else: 
+                    tn += 1
             else:
                 bad += 1
+                if b == "pos":
+                    fp += 1
+                else: 
+                    fn += 1
     print(good, bad, good/(good+bad)*100)
+    print("tp {}\ttn {}\tfp {}\tfn {}".format(tp, tn, fp, fn))
 
 def run_script():
     """Wrapper function"""

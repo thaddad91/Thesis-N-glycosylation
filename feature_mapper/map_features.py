@@ -24,9 +24,11 @@ def unserialize_ara_d():
         sys.exit(1)
     return new_d
 
+
+
 def run_script():
+    """Wrapper function"""
     ara_d = unserialize_ara_d()
-    print(ara_d)
 
 if __name__ == "__main__":
     run_script()
