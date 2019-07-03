@@ -16,9 +16,10 @@ pssm_f = "subset_100_individual_pssms.txt.1"
 with open(pssm_f, "r") as f:
     pssm = f.readlines()
 
-print(pssm[2])
+header = pssm[2].split()[:20]
+print(header)
 sequon = int(data[0].split()[2])
 window = pssm[(sequon)-4:(sequon)+11]
 for line in window:
-    print(line)
+    print(line.split()[2:22])
 
