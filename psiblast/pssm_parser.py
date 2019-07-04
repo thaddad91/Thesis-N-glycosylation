@@ -16,10 +16,19 @@ pssm_f = "subset_100_individual_pssms.txt.1"
 with open(pssm_f, "r") as f:
     pssm = f.readlines()
 
-header = pssm[2].split()[:20]
-print(header)
+pssm_header = pssm[2].split()[:20]
+print(pssm_header)
 sequon = int(data[0].split()[2])
 window = pssm[(sequon)-4:(sequon)+11]
+newline = data[0].rstrip("\n")
 for line in window:
     print(line.split()[2:22])
+    newline += "\t".join([val for val in line.split()[2:22]])
+    newline += "\t"
+
+col_header = ""
+for i in range(1,16):
+    col_header += "\t".join([char+str(i) for char in pssm_header])
+print(col_header)
+print(newline)
 
