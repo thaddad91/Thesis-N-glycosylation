@@ -9,6 +9,7 @@ Description: Parses the ara_d dictionary. Afterwards, every
 
 from multiprocessing.dummy import Pool as ThreadPool
 import sys
+import subprocess, shlex
 
 loc = '/mnt/scratch/hadda003/'
 
@@ -29,16 +30,25 @@ def fasta_cutter(fasta):
                 f.write(header)
                 f.write(sequence)
 
-def run_psiblast(fasta):
+def run_psiblast(fasta, db_loc):
     """Run threaded psiblast for every individual protein FASTA"""
-    pass
+    # Create command
+    # TO-DO fasta entry, output
+    cmd = "run_psipred.pl -d {} {}".format(db_loc, fasta)
+    # Create list to avoid shell=True
+    args = shlex.split(cmd)
+    # Run the command
+    p = subprocess.Popen(args, stdout=subprocess.PIPE, shell=False)
+
+    return answer
 
 def run_wrapper():
     fasta = read_fasta()
     fasta_cutter(fasta)
     sys.exit(1)
+    db_loc = "/mnt/nexenta/reference/blast_latest/databases.nobackup/extracted_latest.nobackup/nr"
     pool = ThreadPool(4)
-    results = pool.map(run_psiblast, fasta)
+    results = pool.map(run_psiblast(fasta, db_loc), fasta)
 
 if __name__ == "__main__":
 	run_wrapper()
