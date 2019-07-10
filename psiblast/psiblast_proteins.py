@@ -7,11 +7,13 @@ Description: Parses the ara_d dictionary. Afterwards, every
              an ASCII PSSM as conservation score feature.
 """
 
-from multiprocessing.dummy import Pool as ThreadPool
+from multiprocessing import Pool
 import sys
 import subprocess, shlex
+import os
+import time
 
-loc = '/mnt/scratch/hadda003/'
+loc = '/mnt/scratch/hadda003/individual_fastas/'
 
 def read_fasta():
     """Reads complete FASTA set of all proteins"""
@@ -30,25 +32,31 @@ def fasta_cutter(fasta):
                 f.write(header)
                 f.write(sequence)
 
-def run_psiblast(fasta, db_loc):
+def run_psiblast(fasta):
     """Run threaded psiblast for every individual protein FASTA"""
     # Create command
-    # TO-DO fasta entry, output
-    cmd = "run_psipred.pl -d {} {}".format(db_loc, fasta)
+    #cmd = "run_psipred.pl -d {} {}".format(db_loc, fasta)  # psipred, same script
+    db_loc = "/mnt/nexenta/reference/blast_latest/databases.nobackup/extracted_latest.nobackup/nr"
+    cmd = "psiblast -query {} -db {} -num_threads 4 -evalue 0.001 -out_ascii_pssm {}.txt"
+    cmd = cmd.format(loc+fasta, db_loc, fasta.split('.fa')[0])
     # Create list to avoid shell=True
     args = shlex.split(cmd)
     # Run the command
-    p = subprocess.Popen(args, stdout=subprocess.PIPE, shell=False)
-
-    return answer
+    print("Running ", fasta)
+    p = subprocess.check_call(args, shell=False)
 
 def run_wrapper():
-    fasta = read_fasta()
-    fasta_cutter(fasta)
-    sys.exit(1)
-    db_loc = "/mnt/nexenta/reference/blast_latest/databases.nobackup/extracted_latest.nobackup/nr"
-    pool = ThreadPool(4)
-    results = pool.map(run_psiblast(fasta, db_loc), fasta)
+    """One-time only for fasta cutting"""
+    #fasta = read_fasta()
+    #fasta_cutter(fasta)
+    # Add all individual fasta files to iterable
+    fastas = []
+    for file_ in os.listdir(loc):
+        if file_.endswith(".fa"):
+            fastas.append(str(file_))
+    print(len(fastas))
+    p = Pool(4)
+    p.map(run_psiblast, fastas)
 
 if __name__ == "__main__":
 	run_wrapper()
