@@ -35,11 +35,12 @@ def fasta_cutter(fasta):
 def run_psiblast(fasta):
     """Run threaded psiblast for every individual protein FASTA"""
     # Create command
-    #cmd = "run_psipred.pl -d {} {}".format(db_loc, fasta)  # psipred, same script
     #db_loc = "/mnt/nexenta/reference/blast_latest/databases.nobackup/extracted_latest.nobackup/nr"
     db_loc = "/mnt/scratch/hadda003/uniprot_db/uniprot_sprot.fasta"
-    cmd = "psiblast -query {} -db {} -num_threads 5 -num_iterations 2 -out_ascii_pssm {}.txt"
-    cmd = cmd.format(loc+fasta, db_loc, fasta.split('.fa')[0])
+    #cmd = "psiblast -query {} -db {} -num_threads 5 -num_iterations 2 -out_ascii_pssm {}.txt"  # psiblast
+    cmd = "run_psipred.pl -d {} {} -o {}"  # psipred
+    cmd = cmd.format(db_loc, loc+fasta, fasta.split('.fa')[0])  # psipred
+    #cmd = cmd.format(loc+fasta, db_loc, fasta.split('.fa')[0])  # psiblast
     # Create list to avoid shell=True
     args = shlex.split(cmd)
     # Run the command
@@ -56,7 +57,7 @@ def run_wrapper():
         if file_.endswith(".fa"):
             fastas.append(str(file_))
     print(len(fastas))
-    p = Pool(4)
+    p = Pool(8)
     p.map(run_psiblast, fastas)
 
 if __name__ == "__main__":
